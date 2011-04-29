@@ -1,0 +1,158 @@
+
+$alert-color: #a00;
+$nominal-color: #008000;
+
+/*
+ * Top-level styles
+ */
+
+html {
+  height: 100%;
+}
+
+body {
+  background-color: #03060f;
+  color: white;
+  font-family: 'Yanone Kaffeesatz', arial, serif;
+  margin: 10px;
+  overflow: hidden;
+
+  background: #000000; /* old browsers */
+  background: -moz-linear-gradient(top, #000000 0%, #040c14 100%); /* firefox */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#000000), color-stop(100%,#040c14)); /* webkit */
+  background: -o-linear-gradient(top, #000000 0%,#040c14 100%); /* opera */}
+
+#container{
+  text-align: center;
+}
+
+#main { 
+  display: inline-block;
+}
+
+/*
+ * Common widget styles
+ */
+
+.source-widget {
+  width: 300px;
+  height: 300px;
+  background-color: rgba(255,255,255,0.1);
+  text-align: center;
+  margin: 5px;
+  display: inline-block;
+  vertical-align: top;
+}
+
+@mixin server-status-arrows {
+  &.status-down .status {
+    color: $alert-color;
+  }
+
+  &.status-up .status {
+    color: $nominal-color;
+  }
+
+  .status.status-up,
+  .status.status-down {
+    display: none;
+  }
+
+  &.status-up .status.status-up,
+  &.status-down .status.status-down {
+    display: block;
+  }
+}
+
+/*
+ * Server status widget styles 
+ */
+
+.server-status-widget {
+  .status {
+    font-size: 68pt;
+    height: 150px;
+    line-height: 150px;
+  }
+
+  .time {
+    font-size: 32pt;
+    height: 50px;
+    line-height: 50px;
+  }
+
+  footer {
+    font-size: 36pt;
+    height: 100px;
+    line-height: 100px;
+  }
+
+  .time {
+    color: #888;
+  }
+
+  @include server-status-arrows;
+}
+
+/*
+ * 4x server status widget styles
+ */
+
+.server-status-4-widget {
+  background-color: inherit;
+
+  .mini-server-status-widget {
+    width: 145px;
+    height: 145px;
+    background-color: rgba(255,255,255,0.1);
+    margin: 0;
+
+    .status {
+      font-size: 50pt;
+      height: 95px;
+      line-height: 95px;
+    }
+
+    footer {
+      font-size: 20pt;
+      height: 50px;
+      line-height: 50px;
+    }
+
+    @include server-status-arrows;
+  }
+
+  .top {
+    margin-bottom: 5px;
+  }
+
+  .bottom {
+    margin-top: 5px;
+  }
+
+  .left {
+    margin-right: 5px;
+  }
+  
+  .right {
+    margin-left: 5px;
+  }
+}
+
+/*
+ * Passive numeric widget styles 
+ */
+
+.passive-numeric-widget {
+  .value {
+    font-size: 150px;
+    height: 200px;
+    line-height: 200px;
+  }
+
+  footer {
+    font-size: 48px;
+    height: 100px;
+    line-height: 100px;
+  }
+}
