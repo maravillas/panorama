@@ -4,6 +4,8 @@ FIXME: write description
 
 ## Usage
 
+Create a configuration file named `config.clj`. See [sample_config.clj](https://github.com/maravillas/panorama/blob/master/sample_config.clj). 
+
 Compile the CoffeeScript file:
 
 ```
