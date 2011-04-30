@@ -4,3 +4,5 @@ lib
 classes
 public/.sass-cache
 public/css/*.css
+/public/js/panorama.js
+/config.clj
