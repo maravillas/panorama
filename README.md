@@ -4,7 +4,19 @@ FIXME: write description
 
 ## Usage
 
-Quick & dirty:
+Compile the CoffeeScript file:
+
+```
+coffee --compile public/js
+```
+
+Compile the stylesheet:
+
+```
+sass --update public/css
+```
+
+In a REPL, start logging and run the server:
 
 ```clojure
 (org.apache.log4j.BasicConfigurator/configure)
