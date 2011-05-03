@@ -30,7 +30,13 @@
   (if (< msec 1000)
     "0s"
     (let [parts (expand-seconds (Math/ceil (/ msec 1000)))]
-      (apply str (flatten (interpose " " (take 2 (drop-while (comp zero? first) (partition 2 parts)))))))))
+      (->> parts
+           (partition 2)
+           (drop-while (comp zero? first))
+           (take 2)
+           (interpose " ")
+           (flatten)
+           (apply str)))))
 
 (defn time-status-changes
   [state]
