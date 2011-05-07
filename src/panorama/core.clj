@@ -1,10 +1,10 @@
 (ns panorama.core
   (:use [panorama.middleware params]
-        [panorama templates config]
+        [panorama templates config source]
         [clojure.contrib logging]
-        aleph.http
-        compojure.core
-        lamina.core
+        [aleph.http]
+        [compojure.core]
+        [lamina.core]
         [ring.middleware.file :only [wrap-file]]
         [ring.middleware.file-info :only [wrap-file-info]])
   (:require [compojure.route :as route]
@@ -17,14 +17,10 @@
 (defonce config (ref []))
 (defonce client-channel (permanent-channel))
 
-(defn state-as-map
-  [[name source]]
-  {name @(:state source)})
-
 (defn build-client-update
   [sources]
   (let [states (if (pos? (count sources))
-                 (apply merge (map state-as-map sources))
+                 (apply merge (map client-update sources) )
                  {})]
     (json/encode states)))
 
@@ -33,60 +29,34 @@
   (proxy [TimerTask] []
     (run []
          (debug "Client timer running")
-         (enqueue channel (build-client-update (:sources @config))))))
-
-(defn next-state
-  [source]
-  ((:fn source) (:channel source) @(:state source)))
-
-(defn update-state
-  [source]
-  (let [update (next-state source)]
-    (dosync
-     (alter (:state source) #(merge % update)))))
-
-(defn make-source-timer
-  [source]
-  (proxy [TimerTask] []
-    (run []
-         (debug (str "Updating " source))
-         (update-state source))))
-
-(defn start-source-updates
-  [timer sources]
-  (doseq [[name source] sources]
-    (let [period (or (:period source)
-                     *default-source-period*)]
-      (.schedule timer (make-source-timer source) (long period) (long period)))))
+         (enqueue channel (build-client-update @config)))))
 
 (defn make-client-handler
   [config client-channel]
   (fn [ch handshake]
     (debug (str "New websocket client connected: " handshake))
-    (enqueue ch (build-client-update (:sources @config)))
+    (enqueue ch (build-client-update @config))
     (siphon client-channel ch)))
+
+(defn schedule-sources
+  [timer sources]
+  (doseq [source sources]
+    (schedule-timer source timer)))
 
 (defn enqueue-value
   [config source-id key value]
-  (let [source ((:sources @config) source-id)
+  (let [source (@config source-id)
         entry {(keyword key) value}]
     (cond
      (not source)
-       (error (str "Source \"" source-id "\" not found. Available sources: " (keys (:sources @config))))
+       (error (str "Source \"" source-id "\" not found. Available sources: " (keys @config)))
      (not key)
        (error "No key specified")
      :else
        (do
          (debug (str "Enqueuing " entry " into " source))
-         (enqueue (:channel source) entry)
+         (receive-message source entry)
          (str key " for " source-id " is now " value)))))
-
-(defn source-state
-  [config source-name]
-  (-> @config
-      :sources
-      (get source-name)
-      :state))
 
 (defroutes main-routes
   (GET "/" []
@@ -97,9 +67,6 @@
                         id :id} :params}
         (enqueue-value config id key value))
 
-  (GET "/source/:id/:key" [id key]
-       (str key " for " id " is: " (@(source-state config id) (keyword key))))
-  
   (GET "/client-socket" []
        (wrap-aleph-handler (make-client-handler config client-channel)))
   
@@ -121,7 +88,7 @@
         client-channel-debug #(debug (str "Client update: " %))]
 
     (.schedule client-timer (make-client-timer client-channel config) (long *client-delay*) (long *client-delay*))
-    (start-source-updates source-timer (:sources @config))
+    (schedule-sources source-timer @config)
 
     ;; This receive-all is deceptively necessary.
     ;; even though client-channel is permanent, it seems to pass on

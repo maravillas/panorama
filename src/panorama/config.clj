@@ -1,19 +1,17 @@
 (ns panorama.config
-  (:use panorama.templates
-        panorama.sources
+  (:use [panorama.source :only [make-source]]
         [clojure.contrib.string :only [lower-case replace-re]]
-        [clojure.contrib logging pprint]))
+        [clojure.contrib logging pprint])
+  (:require [panorama.source.server-status]
+            [panorama.source.server-status-4]
+            [panorama.source.passive-display]))
 
 (defn read-config
   ([filename]
-     (try (let [config-file (load-file filename)
-                sources (into {} (mapcat config-entry->sources config-file))
-                widgets (map config-entry->widget config-file)
-                new-config {:file config-file
-                            :sources sources
-                            :widgets widgets}]
+     (try (let [sources (load-file filename)
+                new-config sources]
             (debug (str "Loaded config: " (with-out-str (pprint new-config))))
-            new-config)
+            (map make-source new-config))
           (catch java.io.FileNotFoundException _
             [])))
   ([]
@@ -22,37 +20,3 @@
 (defn defconfig
   [& body]
   body)
-
-(defn name->id
-  [name]
-  (replace-re #"[ \t#]+" "-" (lower-case name)))
-
-(defn separate
-  [n coll]
-  (map (partial take-nth n)
-       ((apply juxt (map #(partial drop %) (range n))) coll)))
-
-(defn server-status
-  [name period]
-  (let [id (name->id name)]
-    {:ids [id]
-     :names [name]
-     :periods [period]
-     :type :server-status}))
-
-(defn server-status-4
-  [name period & others]
-  (let [id (name->id name)
-        [names periods] (separate 2 others)
-        ids (map name->id names)]
-    {:ids (cons id ids)
-     :names (cons name names)
-     :periods (cons period periods)
-     :type :server-status-4}))
-
-(defn passive-numeric
-  [name]
-  (let [id (name->id name)]
-    {:ids [id]
-     :names [name]
-     :type :passive-numeric}))
