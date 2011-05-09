@@ -64,7 +64,7 @@ class panorama.Connection
         updates = $.parseJSON msg.data
         panorama.updates.updateSources updates
       catch ex
-        console.log ex
+        console.error ex
         console.error "Invalid status message: #{msg.data}"
 
     null
