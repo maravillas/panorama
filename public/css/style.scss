@@ -95,48 +95,52 @@ body {
 }
 
 /*
- * 4x server status widget styles
+ * Mini group widget styles
  */
 
-.server-status-4-widget {
+.mini-group-widget {
   background-color: inherit;
+}
 
-  .mini-server-status-widget {
-    width: 145px;
-    height: 145px;
-    background-color: rgba(255,255,255,0.1);
-    margin: 0;
+/*
+ * Mini server status widget styles
+ */
 
-    .status {
-      font-size: 50pt;
-      height: 95px;
-      line-height: 95px;
-    }
+.mini-server-status-widget {
+  width: 145px;
+  height: 145px;
+  background-color: rgba(255,255,255,0.1);
+  margin: 0;
 
-    footer {
-      font-size: 20pt;
-      height: 50px;
-      line-height: 50px;
-    }
-
-    @include server-status-arrows;
+  .status {
+    font-size: 50pt;
+    height: 95px;
+    line-height: 95px;
   }
 
-  .top {
-    margin-bottom: 5px;
+  footer {
+    font-size: 20pt;
+    height: 50px;
+    line-height: 50px;
   }
 
-  .bottom {
-    margin-top: 5px;
-  }
+  @include server-status-arrows;
+}
 
-  .left {
-    margin-right: 5px;
-  }
-  
-  .right {
-    margin-left: 5px;
-  }
+.top {
+  margin-bottom: 5px;
+}
+
+.bottom {
+  margin-top: 5px;
+}
+
+.left {
+  margin-right: 5px;
+}
+
+.right {
+  margin-left: 5px;
 }
 
 /*

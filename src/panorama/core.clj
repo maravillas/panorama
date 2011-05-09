@@ -2,6 +2,7 @@
   (:use [panorama.middleware params]
         [panorama templates config source]
         [clojure.contrib logging]
+        [clojure pprint]
         [aleph.http]
         [compojure.core]
         [lamina.core]
@@ -60,7 +61,7 @@
 
 (defroutes main-routes
   (GET "/" []
-       (index (:widgets @config)))
+       (index (map widget @config)))
 
   (POST "/source/:id" {{value "value"
                         key "key"
@@ -80,8 +81,7 @@
 
 (defn start-server
   []
-  (dosync
-   (ref-set config (read-config)))
+  (dosync (ref-set config (read-config)))
   (let [stop-server (start-http-server (var app) {:port 8888 :websocket true})
         client-timer (Timer. "panorama-status-timer")
         source-timer (Timer. "panorama-source-timer")

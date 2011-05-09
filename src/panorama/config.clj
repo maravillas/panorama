@@ -3,15 +3,16 @@
         [clojure.contrib.string :only [lower-case replace-re]]
         [clojure.contrib logging pprint])
   (:require [panorama.source.server-status]
-            [panorama.source.server-status-4]
+            [panorama.source.mini-group]
+            [panorama.source.mini-server-status]
             [panorama.source.passive-display]))
 
 (defn read-config
   ([filename]
      (try (let [sources (load-file filename)
-                new-config sources]
+                new-config (flatten (map make-source sources))]
             (debug (str "Loaded config: " (with-out-str (pprint new-config))))
-            (map make-source new-config))
+            new-config)
           (catch java.io.FileNotFoundException _
             [])))
   ([]
