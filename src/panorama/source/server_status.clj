@@ -54,7 +54,8 @@
   ([name period]
      (let [id (name->id name)
            channel (channel)
-           state (ref {})
+           initial-state {:status "down"}
+           state (ref (merge initial-state (time-status-changes initial-state)))
            period (* period 1000)]
        (fork-state-channel channel state)
        (ServerStatus. id name period channel state))))
