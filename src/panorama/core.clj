@@ -21,7 +21,7 @@
 (defn build-client-update
   [sources]
   (let [states (if (pos? (count sources))
-                 (apply merge (map client-update sources) )
+                 (apply merge (map client-update sources))
                  {})]
     (json/encode states)))
 
