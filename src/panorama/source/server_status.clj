@@ -70,7 +70,7 @@
           time (time-status-changes (merge @(:state source) updates))]
       (alter-state (:state source) updates time)))
   (client-update [source]
-    @(:state source))
+    {(:id source) (dissoc @(:state source) :internal)})
   (schedule-timer [source timer]
     (schedule source timer (:period source)))
   (receive-message [source message]

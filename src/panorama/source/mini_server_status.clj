@@ -32,7 +32,7 @@
                          (filter :status (channel-seq (:channel source))))]
       (alter-state (:state source) updates)))
   (client-update [source]
-    @(:state source))
+    {(:id source) @(:state source)})
   (schedule-timer [source timer]
     (schedule source timer (:period source)))
   (receive-message [source message]
