@@ -12,8 +12,12 @@
             [org.danlarkin.json :as json])
   (:import [java.util Timer TimerTask]))
 
-(def *client-delay* 10000)
-(def *default-source-period* 30000)
+;; Send client updates at a slightly offset time to avoid overlapping with 
+;; source update times, most of the time. Otherwise, the client update may
+;; go out before the source is updated, resulting in a stale update.
+;; This deserves a better solution at some point.
+
+(def *client-delay* 10100)
 
 (defonce config (ref []))
 (defonce client-channel (permanent-channel))
