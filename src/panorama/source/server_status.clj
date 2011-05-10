@@ -5,7 +5,7 @@
         [net.cgrand.enlive-html
          :only [defsnippet set-attr content]]))
 
-(defn- expand-seconds [i]
+(defn expand-seconds [i]
   (interleave
    (if (zero? i)
      (repeat 0)
@@ -15,7 +15,7 @@
            [60 60 24 7 i])))
    ["w" "d" "h" "m" "s"]))
 
-(defn- to-time-str
+(defn to-time-str
   [msec]
   (if (< msec 1000)
     "0s"
@@ -28,7 +28,7 @@
            (flatten)
            (apply str)))))
 
-(defn- time-status-changes
+(defn time-status-changes
   [state]
   (let [internal (:internal state)
         status-changed (or (:status-changed internal) 0)]
@@ -54,10 +54,9 @@
   ([name period]
      (let [id (name->id name)
            channel (channel)
-           initial-state {:status "down"}
+           initial-state {:status "down" :time "0s"}
            state (ref (merge initial-state (time-status-changes initial-state)))
            period (* period 1000)]
-       (fork-state-channel channel state)
        (ServerStatus. id name period channel state))))
 
 (extend-type ServerStatus
