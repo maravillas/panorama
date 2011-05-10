@@ -25,9 +25,9 @@
   (widget [source]
     (passive-display-widget (:id source) (:name source)))
   (update-state [source]
-    (alter-state (:state source) (filter :value (channel-seq channel))))
+    (alter-state (:state source) (filter :value (channel-seq (:channel source)))))
   (client-update [source]
-    {(:id source) @(:state source)})
+    @(:state source))
   (schedule-timer [source timer]
     (schedule source timer (:period source)))
   (receive-message [source message]
@@ -35,4 +35,5 @@
 
 (defmethod make-source :passive-display
   [config]
-  (passive-display (:name config)))
+  (let [source (passive-display (:name config))]
+    {(:id source) source}))

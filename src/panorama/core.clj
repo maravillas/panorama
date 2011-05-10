@@ -21,7 +21,7 @@
 (defn build-client-update
   [sources]
   (let [states (if (pos? (count sources))
-                 (apply merge (map client-update sources))
+                 (apply merge (map (fn [[k v]] {k (client-update v)}) sources))
                  {})]
     (json/encode states)))
 
@@ -61,7 +61,7 @@
 
 (defroutes main-routes
   (GET "/" []
-       (index (map widget @config)))
+       (index (map widget (vals @config))))
 
   (POST "/source/:id" {{value "value"
                         key "key"
@@ -88,7 +88,7 @@
         client-channel-debug #(debug (str "Client update: " %))]
 
     (.schedule client-timer (make-client-timer client-channel config) (long *client-delay*) (long *client-delay*))
-    (schedule-sources source-timer @config)
+    (schedule-sources source-timer (vals @config))
 
     ;; This receive-all is deceptively necessary.
     ;; even though client-channel is permanent, it seems to pass on

@@ -32,7 +32,7 @@
                          (filter :status (channel-seq (:channel source))))]
       (alter-state (:state source) updates)))
   (client-update [source]
-    {(:id source) @(:state source)})
+    @(:state source))
   (schedule-timer [source timer]
     (schedule source timer (:period source)))
   (receive-message [source message]
@@ -40,4 +40,5 @@
 
 (defmethod make-source :mini-server-status
   [config]
-  (mini-server-status (:name config)))
+  (let [source (mini-server-status (:name config))]
+    {(:id source) source}))

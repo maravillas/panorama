@@ -1,16 +1,18 @@
 (ns panorama.source.mini-group
   (:use [panorama.source]
         [lamina.core :only [enqueue channel receive-all fork channel-seq]]
+        [clojure.contrib.generic.functor :only [fmap]]
         [net.cgrand.enlive-html
          :only [defsnippet add-class substitute do->]]))
 
 (defn substitute-source
   [source & classes]
-  (if source
-    (do->
-     (substitute (widget source))
-     (apply add-class classes))
-    identity))
+  (let [[id source] (first source)]
+    (if source
+      (do->
+       (substitute (widget source))
+       (apply add-class classes))
+      identity)))
 
 (defn without-widget
   [original]
@@ -46,5 +48,7 @@
     
 (defmethod make-source :mini-group
   [config]
-  (let [sources (map make-source (:sources config))]
-    (cons (mini-group sources) (map without-widget sources))))
+  (let [sources (map make-source (:sources config))
+        group (mini-group sources)
+        source-map (apply merge sources)]
+    (merge {(str (gensym "mini-group")) group} (fmap without-widget source-map))))

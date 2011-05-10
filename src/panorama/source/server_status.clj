@@ -71,7 +71,7 @@
           time (time-status-changes (merge @(:state source) updates))]
       (alter-state (:state source) updates time)))
   (client-update [source]
-    {(:id source) (dissoc @(:state source) :internal)})
+    (dissoc @(:state source) :internal))
   (schedule-timer [source timer]
     (schedule source timer (:period source)))
   (receive-message [source message]
@@ -79,4 +79,5 @@
 
 (defmethod make-source :server-status
   [config]
-  (server-status (:name config)))
+  (let [source (server-status (:name config))]
+    {(:id source) source}))
