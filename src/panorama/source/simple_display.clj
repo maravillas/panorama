@@ -15,7 +15,7 @@
   ([name]
      (let [id (name->id name)
            channel (channel)
-           state (ref {})
+           state (ref {:value ""})
            period (* 60 1000)]
        (fork-state-channel channel state)
        (SimpleDisplay. id name period channel state))))
@@ -25,7 +25,7 @@
   (widget [source]
     (simple-display-widget (:id source) (:name source)))
   (update-state [source]
-    (alter-state (:state source) (filter :value (channel-seq (:channel source)))))
+    (apply alter-state (:state source) (filter :value (channel-seq (:channel source)))))
   (client-update [source]
     @(:state source))
   (schedule-timer [source timer]
