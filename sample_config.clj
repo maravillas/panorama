@@ -10,5 +10,5 @@
               :name "Staging"}
              {:type :mini-server-status
               :name "Demo"}]}
-  {:type :passive-display
+  {:type :simple-display
    :name "#clojure users"})

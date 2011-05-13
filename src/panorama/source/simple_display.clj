@@ -1,29 +1,29 @@
-(ns panorama.source.passive-display
+(ns panorama.source.simple-display
   (:use [panorama.source]
         [lamina.core :only [enqueue channel receive-all fork channel-seq]]
         [net.cgrand.enlive-html
          :only [defsnippet set-attr content]]))
 
-(defsnippet passive-display-widget "templates/widget-passive-numeric.html" [:.passive-numeric-widget]
+(defsnippet simple-display-widget "templates/widget-simple-display.html" [:.simple-display-widget]
   [id name]
   [:#source :footer] (content name)
   [:#source] (set-attr :id (str "source-" id)))
 
-(defrecord PassiveDisplay [id name period channel state])
+(defrecord SimpleDisplay [id name period channel state])
 
-(defn passive-display
+(defn simple-display
   ([name]
      (let [id (name->id name)
            channel (channel)
            state (ref {})
            period (* 60 1000)]
        (fork-state-channel channel state)
-       (PassiveDisplay. id name period channel state))))
+       (SimpleDisplay. id name period channel state))))
 
-(extend-type PassiveDisplay
+(extend-type SimpleDisplay
   Source
   (widget [source]
-    (passive-display-widget (:id source) (:name source)))
+    (simple-display-widget (:id source) (:name source)))
   (update-state [source]
     (alter-state (:state source) (filter :value (channel-seq (:channel source)))))
   (client-update [source]
@@ -33,7 +33,7 @@
   (receive-message [source message]
     (enqueue (:channel source) message)))
 
-(defmethod make-source :passive-display
+(defmethod make-source :simple-display
   [config]
-  (let [source (passive-display (:name config))]
+  (let [source (simple-display (:name config))]
     {(:id source) source}))
