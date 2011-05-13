@@ -17,7 +17,7 @@
   ([name period]
      (let [id (name->id name)
            channel (channel)
-           state (ref {})
+           state (ref {:status "down"})
            period (* period 1000)]
        (fork-state-channel channel state)
        (MiniServerStatus. id name period channel state))))
