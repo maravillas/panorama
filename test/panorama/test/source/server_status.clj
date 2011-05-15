@@ -2,7 +2,10 @@
   (:use panorama.source
         panorama.source.server-status
         lamina.core
-        [lazytest.describe :only [describe it testing]]))
+        [lazytest.describe :only [describe it testing]])
+  (:require [net.cgrand.enlive-html :as enlive]
+            [panorama.test.util :as util])
+  (:import java.io.StringReader))
 
 (def config {:type :server-status
              :name "Production"})
@@ -109,3 +112,24 @@
               "down")
            (= (:time update)
               "0s")))))
+
+(describe "Generating widgets"
+  (it "creates a widget"
+    (let [{src "production"} (make-source config)
+          w (util/widget->str (widget src))]
+      (pos? (count w))))
+  (it "sets the widget's id"
+    (let [{src "production"} (make-source config)
+          w (-> (widget src)
+                util/widget->str
+                StringReader.
+                enlive/html-resource)]
+      (pos? (count (enlive/select w [:#source-production])))))
+  (it "sets the widget's name"
+    (let [{src "production"} (make-source config)
+          w (-> (widget src)
+                util/widget->str
+                StringReader.
+                enlive/html-resource)]
+      (= (first (:content (first (enlive/select w [:footer]))))
+         "Production"))))
