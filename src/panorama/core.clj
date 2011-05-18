@@ -33,8 +33,8 @@
   [channel config]
   (proxy [TimerTask] []
     (run []
-         (debug "Client timer running")
-         (enqueue channel (build-client-update @config)))))
+      (debug "Client timer running")
+      (enqueue channel (build-client-update @config)))))
 
 (defn make-client-handler
   [config client-channel]

@@ -1,15 +1,31 @@
 (ns panorama.test.core
   (:use panorama.core
+        panorama.source
         lamina.core
         [lazytest.describe :only [describe it]])
   (:require [org.danlarkin.json :as json])
   (:import [java.util Timer]))
 
+(defrecord TestSource [state next-state])
+
+(extend-type TestSource
+  Source
+  (widget [source])
+  (update-state [source]
+    (when (= (class (:state source)) clojure.lang.Ref)
+      (dosync (ref-set (:state source) {:status (:next-state source)}))))
+  (client-update [source]
+    (:state source))
+  (schedule-timer [source timer]
+    (schedule source timer 100))
+  (receive-message [source message]
+    (dosync (ref-set (:state source) message))))
+
 (describe "Building client updates"
   (it "creates an JSON update"
-    (let [sources {"source1" {:state (ref {:status "ok"})}
-                   "source2" {:state (ref {:status "down" :time 5})}
-                   "source3" {:state (ref {})}}]
+    (let [sources {"source1" (TestSource. {:status "ok"} nil)
+                   "source2" (TestSource. {:status "down" :time 5} nil)
+                   "source3" (TestSource. {} nil)}]
       (= (json/decode (build-client-update sources))
          {:source1 {:status "ok"}
           :source2 {:status "down" :time 5}
@@ -20,7 +36,7 @@
 
 (describe "Updating the client on a timer"
   (it "enqueues updates"
-    (let [config (ref {:sources {"source1" {:state (ref {:status "ok"})}}})
+    (let [config (ref {"source1" (TestSource. {:status "ok"} nil)})
           ch (channel)
           timer (Timer.)]
       (.schedule timer (make-client-timer ch config) (long 1))
@@ -33,56 +49,38 @@
   [new-state]
   (fn [_ _] {:status new-state}))
 
-(describe "Iterating source states"
-  (it "iterates with the source update function"
-    (let [source {:fn (fn [ch state] [ch state])
-                  :channel "channel"
-                  :state (ref "state")}]
-      (= (next-state source)
-         ["channel" "state"])))
+(describe "Updating states"
   (it "updates the state"
-    (let [source {:fn (new-state-fn "up")
-                  :channel "channel"
-                  :state (ref {:status "down"})}]
+    (let [source (TestSource. (ref {:status "down"}) "up")]
       (update-state source)
       (= @(:state source)
-         {:status "up"}))))
-
-(describe "Updating statuses on a timer"
-  (it "updates the status for a source"
-    (let [source {:state (ref {:status "ok"})
-                  :channel nil
-                  :fn (new-state-fn "down")}
+         {:status "up"})))
+  (it "updates the status for a source on a timer"
+    (let [source (TestSource. (ref {:status "down"}) "up")
           timer (Timer.)]
-      (.schedule timer (make-source-timer source) (long 100))
+      (schedule-timer source timer)
       (Thread/sleep 500)
       (.cancel timer)
       (= @(:state source)
-         {:status "down"})))
-  (it "updates all source statuses"
-    (let [sources {"source1" {:state (ref {:status "ok"})
-                              :channel nil
-                              :fn (new-state-fn "down")
-                              :period 100}
-                   "source2" {:state (ref {:status "?"})
-                              :channel nil
-                              :fn (new-state-fn "up")
-                              :period 100}}
+         {:status "up"})))
+  (it "updates all source statuses on a timer"
+    (let [sources [(TestSource. (ref {:status "ok"}) "super")
+                   (TestSource. (ref {:status "?"}) "!")]
           timer (Timer.)]
-      (start-source-updates timer sources)
+      (schedule-sources timer sources)
       (Thread/sleep 500)
       (.cancel timer)
-      (and (= @(:state (sources "source1"))
-              {:status "down"})
-           (= @(:state (sources "source2"))
-              {:status "up"})))))
+      (and (= @(:state (sources 0))
+              {:status "super"})
+           (= @(:state (sources 1))
+              {:status "!"})))))
 
 (describe "Accepting new client connections"
   (it "sends an initial update"
     (let [ch (channel)
           client-ch (channel)
-          config (ref {:sources {"source1" {:state (ref {:status "ok"})}
-                                 "source2" {:state (ref {:status "?"})}}})
+          config (ref {"source1" (TestSource. {:status "ok"} nil)
+                       "source2" (TestSource. {:status "?"} nil)})
           handler (make-client-handler config client-ch)]
       (handler ch nil)
       (= (json/decode (first (channel-seq ch)))
@@ -91,25 +89,25 @@
   (it "siphons to the client"
     (let [ch (channel)
           client-ch (channel)
-          config (ref {:sources []})
+          config (ref {})
           handler (make-client-handler config client-ch)]
       (handler ch nil)
       (enqueue client-ch :test)
       (some #{:test} (channel-seq ch)))))
 
 (describe "Enqueuing updates"
-  (it "enqueues updates to sources"
+  (it "sends messages to sources"
     (let [ch (channel)
-          config (ref {:sources {"source1" {:channel ch}}})]
+          config (ref {"source1" (TestSource. (ref {}) nil)})]
       (enqueue-value config "source1" "status" "down")
-      (= (channel-seq ch)
-         [{:status "down"}])))
+      (= @(:state (@config "source1"))
+         {:status "down"})))
   (it "returns a string"
     (let [ch (channel)
-          config (ref {:sources {"source1" {:channel ch}}})]
+          config (ref {"source1" (TestSource. (ref {}) nil)})]
       (string? (enqueue-value config "source1" "status" "down"))))
   (it "does not enqueue updates with unspecified keys"
     (let [ch (channel)
-          config (ref {:sources {"source1" {:channel ch}}})]
+          config (ref {"source1" (TestSource. (ref {}) nil)})]
       (enqueue-value config "source1" nil "down")
       (zero? (count (channel-seq ch))))))
