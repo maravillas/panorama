@@ -8,7 +8,6 @@
   ([filename]
      (try (let [sources (load-file filename)
                 new-config (into (array-map) (map make-source sources))]
-            (debug (str "As sources: " (with-out-str (pprint (map make-source sources)))))
             (debug (str "Loaded config: " (with-out-str (pprint new-config))))
             new-config)
           (catch java.io.FileNotFoundException _
