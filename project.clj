@@ -8,6 +8,8 @@
                  [ring "0.3.7"]
                  [org.danlarkin/clojure-json "1.2-SNAPSHOT"]
                  [com.stuartsierra/lazytest "1.1.2"]
+                 [clojure-twitter "1.2.5"]
+                 [clj-time "0.3.0"]
                  [log4j "1.2.15" :exclusions [javax.mail/mail
                                               javax.jms/jms
                                               com.sun.jdmk/jmxtools
