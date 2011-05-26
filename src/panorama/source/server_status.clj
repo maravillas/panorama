@@ -63,6 +63,8 @@
   Source
   (widget [source]
     (server-status-widget (:id source) (:name source)))
+  (js [source]
+    (read-resource "js/server-status.js"))
   (update-state [source]
     (let [updates (apply merge
                          {:status "down"}

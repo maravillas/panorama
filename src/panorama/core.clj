@@ -64,9 +64,13 @@
          (receive-message source entry)
          (str key " for " source-id " is now " value)))))
 
+
+
 (defroutes main-routes
   (GET "/" []
-       (index (map widget (vals @config))))
+       (let [sources (vals @config)]
+         (index (map widget sources)
+                (apply str (distinct (map js sources))))))
 
   (POST "/source/:id" {{value "value"
                         key "key"

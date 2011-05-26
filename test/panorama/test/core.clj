@@ -11,6 +11,7 @@
 (extend-type TestSource
   Source
   (widget [source])
+  (js [source])
   (update-state [source]
     (when (= (class (:state source)) clojure.lang.Ref)
       (dosync (ref-set (:state source) {:status (:next-state source)}))))

@@ -1,27 +1,7 @@
 panorama = {}
 
-panorama.updates =
-  updateSources: (updates) ->
-    for sourceName, sourceUpdates of updates
-      source = $("#source-#{sourceName}")
-
-      for key, update of sourceUpdates
-        @updateTypes[key].call(this, source, update) if key isnt "internal"
-
-  statusClassRegex: /status-[^\s]+/g,
-
-  updateTypes:
-    status: (source, status) ->
-      source.removeClass (index, classes) =>
-        classes.match(@statusClassRegex).join " "
-
-      source.addClass "status-#{status}"
-
-    time: (source, time) ->
-      $(".time", source).text time
-
-    value: (source, value) ->
-      $(".value", source).text value
+# The map of updater functions for sources to add to
+window.panorama = {updaters: {}}
 
 panorama.scaling =
   pxToInt: (str) ->
@@ -45,7 +25,6 @@ panorama.scaling =
   scale: (origWidth, origHeight) ->
     $(document.body).css "zoom", @calculateScale(origWidth, origHeight)
 
-
 class panorama.Connection
   constructor: (@url) ->
 
@@ -62,7 +41,11 @@ class panorama.Connection
       console.log "Message: #{msg.data}"
       try
         updates = $.parseJSON msg.data
-        panorama.updates.updateSources updates
+        for sourceName, sourceUpdates of updates
+          if sourceUpdates
+            source = $("#source-#{sourceName}")
+
+            window.panorama.updaters[source.data("type")](source, sourceUpdates)
       catch ex
         console.error ex
         console.error "Invalid status message: #{msg.data}"

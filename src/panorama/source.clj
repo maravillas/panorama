@@ -1,11 +1,14 @@
 (ns panorama.source
-  (:use [clojure.contrib.string :only [lower-case replace-re]]
-        [lamina.core :only [receive-all fork]]
-        [clojure.contrib.logging :only [debug]])
+  (:use [clojure.contrib
+         [string :only [lower-case replace-re]]
+         [logging :only [debug]]]
+        [clojure.java.io :only [resource]]
+        [lamina.core :only [receive-all fork]])
   (:import [java.util TimerTask]))
 
 (defprotocol Source
   (widget [source])
+  (js [source])
   (update-state [source])
   (client-update [source])
   (schedule-timer [source timer])
@@ -36,3 +39,7 @@
 (defn schedule
   [source timer period]
   (.schedule timer (make-source-timer source) (long period) (long period)))
+
+(defn read-resource
+  [r]
+  (slurp (resource r)))

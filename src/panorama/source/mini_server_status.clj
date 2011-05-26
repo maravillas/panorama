@@ -26,6 +26,8 @@
   Source
   (widget [source]
     (mini-server-status-widget (:id source) (:name source)))
+  (js [source]
+    (read-resource "js/mini-server-status.js"))
   (update-state [source]
     (let [updates (apply merge
                          {:status "down"}

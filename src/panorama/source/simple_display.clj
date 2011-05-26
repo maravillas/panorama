@@ -24,6 +24,8 @@
   Source
   (widget [source]
     (simple-display-widget (:id source) (:name source)))
+  (js [source]
+    (read-resource "js/simple-display.js"))
   (update-state [source]
     (apply alter-state (:state source) (filter :value (channel-seq (:channel source)))))
   (client-update [source]

@@ -19,6 +19,7 @@
   (reify
     Source
     (widget [source])
+    (js [source] (js original))
     (update-state [source] (update-state original))
     (client-update [source] (client-update original))
     (schedule-timer [source timer] (schedule-timer original timer))
@@ -41,6 +42,7 @@
   Source
   (widget [source]
     (mini-group-widget (:sources source)))
+  (js [source])
   (update-state [source])
   (client-update [source])
   (schedule-timer [source timer])

@@ -108,6 +108,8 @@
   Source
   (widget [source]
     (twitter-widget (:id source) (:name source)))
+  (js [source]
+    (read-resource "js/twitter.js"))
   (update-state [source]
     (let [tweets (process-tweets (fetch-tweets source)
                                  (:users source)
