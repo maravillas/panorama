@@ -3,7 +3,7 @@
   :dependencies [[org.clojure/clojure "1.2.0"]
                  [org.clojure/clojure-contrib "1.2.0"]
                  [compojure "0.6.2"]
-                 [aleph "0.1.5-SNAPSHOT"]
+                 [aleph "0.2.0-alpha1"]
                  [enlive "1.0.0"]
                  [ring "0.3.7"]
                  [org.danlarkin/clojure-json "1.2-SNAPSHOT"]
