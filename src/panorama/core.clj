@@ -46,6 +46,7 @@
 (defn schedule-sources
   [timer sources]
   (doseq [source sources]
+    (update-state source)
     (schedule-timer source timer)))
 
 (defn enqueue-value
