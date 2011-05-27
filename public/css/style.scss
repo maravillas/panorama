@@ -42,6 +42,7 @@ body {
   margin: 5px;
   display: inline-block;
   vertical-align: top;
+  float: left;
 }
 
 @mixin server-status-arrows {
@@ -158,5 +159,33 @@ body {
     font-size: 48px;
     height: 100px;
     line-height: 100px;
+  }
+}
+
+/*
+ * Twitter widget styles
+ */
+
+.twitter-widget {
+  clear: both;
+  background-color: transparent;
+  width: 100%;
+  height: 1em;
+  font-size: 110%;
+  color: #00a689;  
+  text-align: left;
+
+  .tweet {
+    height: 1em;
+    width: 900px;
+  }
+
+  .user {
+    color: white;
+  }
+
+  .date {
+    color: #006c5a;
+    font-size: 70%;
   }
 }

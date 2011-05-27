@@ -3,13 +3,14 @@
         [twitter :as twitter]
         [oauth.client :as oauth]
         [lamina.core :only [enqueue channel receive-all fork channel-seq]]
+        [clojure.contrib.logging]
         [net.cgrand.enlive-html :only [defsnippet set-attr content]])
   (:require [clj-time
              [core :as time]
              [format :as time-format]]))
 
 (def incoming-date-format (time-format/formatter "E MMM d HH:mm:ss Z YYYY"))
-(def outgoing-date-format (time-format/formatter "M/d h:m a"))
+(def outgoing-date-format (time-format/with-zone (time-format/formatter "M/d, h:mm a") (time/default-time-zone)))
 
 (defn age-limit->period
   [age-limit]
@@ -54,9 +55,9 @@
 (defn trim-tweet
   [tweet]
   (-> tweet
-      (assoc :screen-name (:screen_name (:user tweet)))
+      (assoc :user (:screen_name (:user tweet)))
       (assoc :date (created-date tweet))
-      (select-keys [:text :date :screen-name])))
+      (select-keys [:text :date :user])))
 
 (defn compare-dates
   [t1 t2]
@@ -85,14 +86,15 @@
        (map format-date)))
 
 (defsnippet twitter-widget "templates/widget-twitter.html" [:.twitter-widget]
-  [id name]
+  [id]
   [:#source] (set-attr :id (str "source-" id)))
 
-(defrecord Twitter [users tweets age-limit consumer access-token access-secret])
+(defrecord Twitter [id users tweets age-limit consumer access-token access-secret])
 
 (defn twitter
   ([{:keys [users age-limit oauth]}]
-     (Twitter. users
+     (Twitter. (str (gensym "twitter"))
+               users
                (ref [])
                (age-limit->period age-limit)
                (oauth/make-consumer (:consumer-key oauth)
@@ -107,7 +109,7 @@
 (extend-type Twitter
   Source
   (widget [source]
-    (twitter-widget (:id source) (:name source)))
+    (twitter-widget (:id source)))
   (js [source]
     (read-resource "js/twitter.js"))
   (update-state [source]
@@ -119,7 +121,7 @@
   (client-update [source]
     @(:tweets source))
   (schedule-timer [source timer]
-    (schedule source timer 300))
+    (schedule source timer (* 300 1000)))
   (receive-message [source message]
     (enqueue (:channel source) message)))
     

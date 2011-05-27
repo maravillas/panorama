@@ -2,7 +2,7 @@
   (:use [panorama.source :only [make-source]]
         [clojure.contrib.string :only [lower-case replace-re]]
         [clojure.contrib logging pprint])
-  (:require [panorama.source server-status mini-group mini-server-status simple-display]))
+  (:require [panorama.source server-status mini-group mini-server-status simple-display twitter]))
 
 (defn read-config
   ([filename]

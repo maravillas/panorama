@@ -83,14 +83,14 @@
                                  :foo 1
                                  :bar 2
                                  :baz 3})))
-         #{:text :date :screen-name}))
+         #{:text :date :user}))
     (it "converts the date"
       (= (:date (trim-tweet (make-tweet :created "Fri May 20 00:00:00 +0000 2011")))
          (date-time 2011 5 20 0 0 0)))
     (it "pulls out the screen name"
-      (= (:screen-name (trim-tweet {:text ""
-                                    :created_at "Fri May 20 00:00:00 +0000 2011"
-                                    :user {:screen_name "maravillas" :foo 1}}))
+      (= (:user (trim-tweet {:text ""
+                             :created_at "Fri May 20 00:00:00 +0000 2011"
+                             :user {:screen_name "maravillas" :foo 1}}))
          "maravillas")))
   (testing "Full tweet processing"
     (it "excludes replies"
